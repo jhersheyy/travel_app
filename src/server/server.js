@@ -31,6 +31,11 @@ function listening(){
     console.log(`JHWeather now running on localhost: ${port}`);
   };
 
+// Use dist html file for home route
+  app.get('/', function (req, res) {
+    res.sendFile('dist/index.html')
+})
+
 // Initialize all route with a callback function
 app.get('/all', sendData);
 

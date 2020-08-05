@@ -1,7 +1,7 @@
 import { initPage } from './js/app'
 
-import './styles/resets.scss'
-import './styles/styles.scss'
+//import './styles/resets.scss'
+//import './styles/styles.scss'
 
 
 //var mylogo = document.getElementById('jhlogo');
