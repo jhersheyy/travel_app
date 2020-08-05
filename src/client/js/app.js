@@ -8,8 +8,11 @@ let newDate = (d.getMonth()+1)+'.'+ d.getDate()+'.'+ d.getFullYear();
 // Personal API Key for OpenWeatherMap API
 const apiKey = '&units=imperial&appid=b3d41d6f6179531c20798bbcc36b4afd';
 
-// Event listener to add function to existing HTML DOM element
-document.getElementById('generate').addEventListener('click', performAction);
+//Initial function to load page and then make event listener
+function initPage(e){
+  // Event listener to add function to existing HTML DOM element
+  document.getElementById('generate').addEventListener('click', performAction);
+}
 
 /* Function called by event listener */
 function performAction(e){
@@ -72,3 +75,5 @@ const postData = async ( url = '/add', data = {})=>{
     console.log("error", error);
     }
 };
+
+export { initPage }
