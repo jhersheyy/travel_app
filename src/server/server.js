@@ -23,12 +23,12 @@ app.use(cors());
 app.use(express.static('dist'));
 
 // Setup Server
-const port = 3000;
+const port = 8081;
 const server = app.listen(port, listening);
 
 // Callback to debug
 function listening(){
-    console.log(`JHWeather now running on localhost: ${port}`);
+    console.log(`JH Travel App now running on port ${port}`);
   };
 
 // Use dist html file for home route

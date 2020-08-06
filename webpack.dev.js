@@ -8,6 +8,17 @@ module.exports = {
     entry: './src/client/index.js',
     mode: 'development',
     devtool: 'source-map',
+    devServer:{
+    //webpack-dev-server setup with devServer.proxy
+        host: 'localhost',
+        port: 8080,
+        proxy: {
+            //redirect to prod port
+            context: ()=> true,
+            target: "http://localhost:8081/",
+            secure: false
+        }
+    },
     module: {
         rules: [
             {

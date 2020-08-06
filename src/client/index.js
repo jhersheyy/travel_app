@@ -8,7 +8,7 @@ import './styles/style.scss'
 //mylogo.src = logo;
 
 // Call init on DOMContentLoaded event.
-window.addEventListener('DOMContentLoaded', init);
+window.addEventListener('DOMContentLoaded', initPage);
 
 
 export {
