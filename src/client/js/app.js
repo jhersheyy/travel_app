@@ -19,6 +19,7 @@ function performAction(e){
     
     /*get and save how many days til trip date*/
     let countdown = getCountdown(depDate);
+    postData('/add', {title: "countdown", data:{daysLeft: countdown}});
 
     /*convert input location to lat,long with geonames api*/
     getLatLong(geoURL,location,geoKey)
@@ -26,16 +27,16 @@ function performAction(e){
 
     /*send info from api to server to save as project data*/
     .then(function(geoData){
-        let projData = {loc: location, lat: geoData.lat, long: geoData.lng, region: geoData.adminName1, country: geoData.countryCode}
+        let projData = {title: "geoInfo", data: {loc: location, lat: geoData.lat, long: geoData.lng, region: geoData.adminName1, country: geoData.countryCode}};
         postData('/add', projData)
-        return projData;
+        return projData.data;
     })
     /*use projData to query weatherbit api*/
-    .then(function(pData){
+    .then(function(pData){//data object only
       let lat = pData.lat;
       let long =pData.long;
       let temp= getWeather(lat, long, depDate, weatherKey);
-      console.log(temp);
+      console.log("returned from getweather: ", temp);
     })
     
     //.then(()=>
@@ -77,7 +78,7 @@ const getWeather = async (lat, long, date, key)=>{
   try {
     const data = await res.json();
     console.log(data)
-    console.log("temp: ", data.data[0].temp);
+    console.log("temp in getweather: ", data.data[0].temp);
     return data;
   }  catch(error) {
     console.log("error", error);

@@ -48,7 +48,7 @@ function sendData (req, res) {
 app.post('/add', addPost);
 
 function addPost(req,res){
-  projectData = req.body;
+  projectData[req.body.title] = req.body.data;
   res.send(projectData);
   console.log("pdata now set to: ", projectData)
 };
