@@ -47,13 +47,8 @@ function sendData (req, res) {
 // Post Route
 app.post('/add', addPost);
 
-const data = [];
 function addPost(req,res){
-  newEntry = {
-      temp: req.body.temp,
-      date: req.body.date,
-      content: req.body.content
-  }
-  projectData = newEntry;
+  projectData = req.body;
   res.send(projectData);
+  console.log("pdata now set to: ", projectData)
 };

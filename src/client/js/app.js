@@ -1,12 +1,9 @@
 /* Global Variables */
-let baseURL = 'https://cors-anywhere.herokuapp.com/https://api.openweathermap.org/data/2.5/weather?zip=';
-
+const geoURL= 'http://api.geonames.org/postalCodeSearchJSON?placename='
+const geoKey= '&maxRows=1&username=jhersheyy'
 // Create a new date instance dynamically with JS
-let d = new Date();
-let newDate = (d.getMonth()+1)+'.'+ d.getDate()+'.'+ d.getFullYear();
-
-// Personal API Key for OpenWeatherMap API
-const apiKey = '&units=imperial&appid=b3d41d6f6179531c20798bbcc36b4afd';
+//let d = new Date();
+//let newDate = (d.getMonth()+1)+'.'+ d.getDate()+'.'+ d.getFullYear();
 
 //Initial function to load page and then make event listener
 function initPage(e){
@@ -16,15 +13,18 @@ function initPage(e){
 
 /* Function called by event listener */
 function performAction(e){
-    let newZip =  document.getElementById('zip').value;
-    let uContent = document.getElementById('feelings').value;
-    getWeather(baseURL,newZip, apiKey) // no semicolon before .then
-    .then(function(weatherData){
-        postData('/add', {temp: weatherData.main.temp, date: newDate, content: uContent})
+    let location =  document.getElementById('location').value; 
+    //let uContent = document.getElementById('feelings').value;
+    //getLatLong returns object with location info keys and info vals
+    getLatLong(geoURL,location,geoKey)
+    .then(function(geoData){
+        let projData = {loc: location, lat: geoData.lat, long: geoData.lng, region: geoData.adminName1, country: geoData.countryCode}
+        postData('/add', projData)
+    
     })
-    .then(()=>
-        updateUI()
-    )
+    //.then(()=>
+    //    updateUI()
+    //)
 }
 
 const updateUI = async () => {
@@ -44,8 +44,18 @@ const updateUI = async () => {
   }
 }
 
-
-/* Function to GET Web API Data*/
+const getLatLong = async(url, location, key)=>{
+  console.log("URL SET TO: ",url+location+key);
+  const res = await fetch(url+location+key)
+  try{
+    const data = await res.json();
+    console.log("in getlatlong: ", data)
+    return data.postalCodes[0];
+  } catch(error){
+    console.log("error in getLatLong():: ",error)
+  }
+}
+/* Function to GET Web API Data
 const getWeather = async (baseURL, zip, key)=>{
     const res = await fetch(baseURL+zip+key)
     try {
@@ -55,7 +65,7 @@ const getWeather = async (baseURL, zip, key)=>{
       console.log("error", error);
       // appropriately handle the error
     }
-  }
+  }*.
 
 /* Function to POST data */
 const postData = async ( url = '/add', data = {})=>{
