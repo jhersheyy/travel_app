@@ -15,13 +15,17 @@ function initPage(e){
 function performAction(e){
     let location =  document.getElementById('location').value; 
     //let uContent = document.getElementById('feelings').value;
-    //getLatLong returns object with location info keys and info vals
+
+    /*convert input location to lat,long with geonames api*/
     getLatLong(geoURL,location,geoKey)
+    //getLatLong returns object with location info keys and info vals from api
+
+    /*send info from api to server to save as project data*/
     .then(function(geoData){
         let projData = {loc: location, lat: geoData.lat, long: geoData.lng, region: geoData.adminName1, country: geoData.countryCode}
         postData('/add', projData)
-    
     })
+    
     //.then(()=>
     //    updateUI()
     //)
