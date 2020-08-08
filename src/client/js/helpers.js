@@ -6,12 +6,32 @@ function getCountdown(ddate){
     let dd = new Date(ddate);
     const day_in_ms = 1000 * 60 * 60 * 24 ;
     //get dates in ms
-    let d_full = Date.UTC(d.getFullYear(), d.getMonth(), d.getDate());
-    let dd_full= Date.UTC(dd.getFullYear(), dd.getMonth(), dd.getDate()); 
+    let d_full = Date.UTC(d.getFullYear(), (d.getMonth()), d.getDate());
+    let dd_full= Date.UTC(dd.getFullYear(), (dd.getMonth()), dd.getDate()); 
     //conert back to days
     let result= Math.floor(dd_full-d_full)/day_in_ms;
     return result;
   }
+
+/*gets date after given date*/
+function tomorrow(date){
+  let d = new Date(date);
+  let copy = new Date(date);
+  //console.log("input: ",d, " and ", copy);
+  copy.setDate(d.getDate()+1);
+  //console.log("TOMORROW: from ", d, " to ", copy);
+  return copy.toISOString().slice(0,10);//formats into yyyy-mm-dd
+}
+
+/*converts date to last year of history*/
+function lastYear(d){
+  let date = new Date(d);
+  let copy = new Date(d);//date;
+  copy.setFullYear(date.getFullYear()-1);
+  //console.log("ORIGINAL DATE: ", date.toISOString().slice(0,10))
+  //console.log("ALTERED DATE: ", copy.toISOString().slice(0,10))
+  return copy.toISOString().slice(0,10); //formats into yyyy-mm-dd
+}
 
 /*Get Geonames API Location info*/
 const getLatLong = async(url, location, key)=>{
@@ -23,19 +43,52 @@ const getLatLong = async(url, location, key)=>{
     console.log("error in getLatLong():: ",error)
   }
 }
+/*Take in object from weatherbit query, return object of helpful info*/
+function getInfo(dataObj){
+  let result ={};
 
+  result.max = dataObj.max_temp;
+  result.min = dataObj.min_temp;
+  result.temp = dataObj.temp;
+  result.snow = dataObj.snow;
+  result.clouds = dataObj.clouds;
+  result.humidity= dataObj.rh;
+  console.log("GET INFO RESULT: ", result);
+  return result;
+}
 /*Get Weatherbit API Weather Data*/
 const getWeather = async (lat, long, date, key)=>{
-    const currWeatherURL=`https://api.weatherbit.io/v2.0/forecast/daily?&lat=${lat}&lon=${long}&units=I&key=${key}`;
-    //const histWeatherURL=`https://api.weatherbit.io/v2.0/history/daily&lat=${lat}&lon=${long}&start_date=${date}&end_date=${endDate}&units=I&key=${key}`;
-    const res = await fetch(currWeatherURL)
+    let weatherURL='';
+    //const histWeatherURL=
+    if (getCountdown(date) > 16){
+      console.log("Finding historic weather for (unchanged): ",date)
+      date = lastYear(date);
+      let endDate = tomorrow(date);
+      weatherURL=`https://api.weatherbit.io/v2.0/history/daily?lat=${lat}&lon=${long}&start_date=${date}&end_date=${endDate}&units=I&key=${key}`;
+    }
+    else{
+      console.log("Finding current weather for: ", date);
+      weatherURL=`https://api.weatherbit.io/v2.0/forecast/daily?&lat=${lat}&lon=${long}&units=I&key=${key}`;
+    }
+    const res = await fetch(weatherURL)
     try {
       const data = await res.json();
       console.log(data)
-      console.log("temp in getweather: ", data.data[0].temp);
-      return data;
+      if (weatherURL.includes('history')){
+        //console.log("USED HISTORY!");
+        //used historic api, only one item in data array
+        console.log("temp in getweather: ", data.data[0].temp);
+        return getInfo(data.data[0]);
+      } else{
+        //used 16-day forecast api, 16 items in array; use countdown+1
+        let i= getCountdown(date)+1;
+        //console.log(i);
+        console.log("temp in getweather: ",data.data[i].temp);
+        return getInfo(data.data[i]);
+      }
+      //return data;
     }  catch(error) {
-      console.log("error", error);
+      console.log("error in getWeather():: ", error);
       // appropriately handle the error
     }
   }

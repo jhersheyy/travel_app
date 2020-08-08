@@ -9,7 +9,7 @@ const geoKey= '&maxRows=1&username=jhersheyy'
 //weatherURL's in function only (using template literals-were causing referenceErrors)
 const weatherKey= '430488ce7d904004b4252036356fc59d';
 
-//Initial function to load page and then make event listener
+/*Initial function to load page and then make event listener*/
 function initPage(e){
   // Event listener to add function to existing HTML DOM element
   document.getElementById('generate').addEventListener('click', performAction);
@@ -17,19 +17,19 @@ function initPage(e){
 
 /* Function called by event listener */
 function performAction(e){
-    /*retrieve and store user input from UI*/
+    //retrieve and store user input from UI
     let location =  document.getElementById('location').value; 
     let depDate = document.getElementById('dday').value;//format: 2020-08-20
     
-    /*get and save how many days til trip date*/
+    //get and save how many days til trip date
     let countdown = getCountdown(depDate);
     postData('/add', {title: "countdown", data:{daysLeft: countdown}});
 
-    /*convert input location to lat,long with geonames api*/
+    //convert input location to lat,long with geonames api
     getLatLong(geoURL,location,geoKey)
-    //getLatLong returns object with location info keys and info vals from api
+    ////gLL() returns object with loc info keys and vals from api
 
-    /*send info from api to server to save as project data*/
+    //send info from api to server to save as project data
     .then(function(geoData){
         let projData = {title: "geoInfo", data: {loc: location, lat: geoData.lat, long: geoData.lng, region: geoData.adminName1, country: geoData.countryCode}};
         postData('/add', projData)
@@ -38,9 +38,12 @@ function performAction(e){
     /*use projData to query weatherbit api*/
     .then(function(pData){//data object only
       let lat = pData.lat;
-      let long =pData.long;
-      let temp= getWeather(lat, long, depDate, weatherKey);
-      console.log("returned from getweather: ", temp);
+      let long =pData.long; //need to make this wait!!!!
+      let weatherInfo= getWeather(lat, long, depDate, weatherKey);//object of important info from api query
+      return weatherInfo})
+    .then(function(wInfo){
+      let weatherData = {title: "weatherInfo", data: wInfo};//format for projData
+      postData('/add',weatherData);
     })
     
     //.then(()=>
