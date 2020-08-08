@@ -17,40 +17,66 @@ function initPage(e){
 
 /* Function called by event listener */
 function performAction(e){
-    //retrieve and store user input from UI
-    let location =  document.getElementById('location').value; 
-    let depDate = document.getElementById('dday').value;//format: 2020-08-20
+  //retrieve and store user input from UI
+  let location =  document.getElementById('location').value; 
+  let depDate = document.getElementById('dday').value;//format: 2020-08-20
     
-    //get and save how many days til trip date
-    let countdown = getCountdown(depDate);
-    postData('/add', {title: "countdown", data:{daysLeft: countdown}});
+  //get and save how many days til trip date
+  let countdown = getCountdown(depDate);
+  postData('/add', {title: "countdown", data:{daysLeft: countdown}});
 
-    //convert input location to lat,long with geonames api
-    getLatLong(geoURL,location,geoKey)
+  //convert input location to lat,long with geonames api
+  getLatLong(geoURL,location,geoKey)
     ////gLL() returns object with loc info keys and vals from api
 
-    //send info from api to server to save as project data
-    .then(function(geoData){
-        let projData = {title: "geoInfo", data: {loc: location, lat: geoData.lat, long: geoData.lng, region: geoData.adminName1, country: geoData.countryCode}};
-        postData('/add', projData)
-        return projData.data;
-    })
-    /*use projData to query weatherbit api*/
-    .then(function(pData){//data object only
-      let lat = pData.lat;
-      let long =pData.long; //need to make this wait!!!!
-      let weatherInfo= getWeather(lat, long, depDate, weatherKey);//object of important info from api query
-      return weatherInfo})
-    .then(function(wInfo){
-      let weatherData = {title: "weatherInfo", data: wInfo};//format for projData
-      postData('/add',weatherData);
-    })
-    
+  //send info from api to server to save as project data
+  .then(function(geoData){
+      let projData = {title: "geoInfo", data: {loc: location, lat: geoData.lat, long: geoData.lng, region: geoData.adminName1, country: geoData.countryCode}};
+      postData('/add', projData)
+      //return projData.data;
+  })
+  /*use projData from serverside to query weatherbit api*/
+  .then(function(){
+    let allData = getProjData();
+    return allData})
+  .then(function(pData){
+    pData = pData['geoInfo'];
+    let lat = pData.lat;
+    let long =pData.long; 
+    let weatherInfo= getWeather(lat, long, depDate, weatherKey);//object of important info from api query
+    return weatherInfo})
+  //send weatherData back to projectData on server side
+  .then(function(wInfo){
+    let weatherData = {title: "weatherInfo", data: wInfo};//format for projData
+    postData('/add',weatherData);
+  })
     //.then(()=>
     //    updateUI()
     //)
 }
 
+const getProjData = async () =>{
+  const request = await fetch('/all')
+  try{
+    const allData = await request.json();
+    console.log("ALLDATA: ",allData);
+    return allData;
+  } catch(error){
+    console.log("error in getProjData():: ", error);
+  }
+}
+
+const updateUI = async () => {
+  //retrieve data from our app
+  const allData = await getProjData();
+  
+  //select the necessary elements on the DOM (index.html), 
+  //update their necessary values to reflect the dynamic values for temp, date, user input
+  document.getElementById('date').innerHTML = "DATE: " + allData.date;
+  document.getElementById('temp').innerHTML = "TEMP: " + allData.temp;
+  document.getElementById('content').innerHTML = "NOTE: "+ allData.content;
+}
+/*
 const updateUI = async () => {
   const request = await fetch('/all');
   //retrieve data from our app
@@ -67,6 +93,7 @@ const updateUI = async () => {
     console.log("error", error);
   }
 }
+*/
 
 /* Function to POST data */
 const postData = async ( url = '/add', data = {})=>{
