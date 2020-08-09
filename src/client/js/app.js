@@ -1,13 +1,16 @@
 import {getLatLong} from './helpers'
 import {getWeather} from './helpers'
 import {getCountdown} from './helpers'
+import {getPic} from './helpers'
 
 /* Global Variables */
 const geoURL= 'http://api.geonames.org/postalCodeSearchJSON?placename='
-const geoKey= '&maxRows=1&username=jhersheyy'
+const geoKey= '&maxRows=1&countryBias=US&username=jhersheyy' //note the US bias
 
 //weatherURL's in function only (using template literals-were causing referenceErrors)
 const weatherKey= '430488ce7d904004b4252036356fc59d';
+//pixURL in function, also using template literals
+const pixKey= '17824144-5c1b0272b392f2756cef29e29';
 
 /*Initial function to load page and then make event listener*/
 function initPage(e){
@@ -31,7 +34,7 @@ function performAction(e){
 
   //send info from api to server to save as project data
   .then(function(geoData){
-      let projData = {title: "geoInfo", data: {loc: location, lat: geoData.lat, long: geoData.lng, region: geoData.adminName1, country: geoData.countryCode}};
+      let projData = {title: "geoInfo", data: {city: geoData.city_name, lat: geoData.lat, long: geoData.lng, region: geoData.adminName1, country: geoData.countryCode}};
       postData('/add', projData)
       //return projData.data;
   })
@@ -50,54 +53,53 @@ function performAction(e){
     let weatherData = {title: "weatherInfo", data: wInfo};//format for projData
     postData('/add',weatherData);
   })
-    //.then(()=>
-    //    updateUI()
-    //)
+  //updates ui with data and relevant img from pixabay
+  .then(()=>
+    updateUI()
+  )
 }
 
 const getProjData = async () =>{
   const request = await fetch('/all')
   try{
     const allData = await request.json();
-    console.log("ALLDATA: ",allData);
+    //console.log("ALLDATA: ",allData);
     return allData;
   } catch(error){
     console.log("error in getProjData():: ", error);
   }
 }
 
+/*Gets image from pixabay and updates UI with project data and image*/
 const updateUI = async () => {
   //retrieve data from our app
-  const allData = await getProjData();
+  const allData = await getProjData()
   
+  .then(allData => {
+    let gData = allData['geoInfo'];
+    console.log("UPDATE UI GDATA: ", gData);
+    //let wData = allData['weatherInfo'];
+    //console.log("UPDATE UI WDATA: ", wData);
+    let place = gData.loc;
+  //}
+    let picResult= getPic(place, pixKey);//takes input, key
+    return picResult})
+  .then(picResult=>{
+    console.log("UUI picresult: ", picResult);
+    let img = picResult.hits[0];
+    console.log("UUI img data: ",img);
+    let imgURL = img.webformatURL;
+    console.log("UUI: imgURL: ", imgURL);
   //select the necessary elements on the DOM (index.html), 
   //update their necessary values to reflect the dynamic values for temp, date, user input
-  document.getElementById('date').innerHTML = "DATE: " + allData.date;
-  document.getElementById('temp').innerHTML = "TEMP: " + allData.temp;
-  document.getElementById('content').innerHTML = "NOTE: "+ allData.content;
+    document.getElementById('date').innerHTML = "DATE: " ;//+ allData.date;
+    document.getElementById('temp').innerHTML = "TEMP: " ;//+ allData.temp;
+    document.getElementById('content').innerHTML = "NOTE: ";//+ allData.content;
+  })
 }
-/*
-const updateUI = async () => {
-  const request = await fetch('/all');
-  //retrieve data from our app
-  try{
-    const allData = await request.json();
-    
-    //select the necessary elements on the DOM (index.html), 
-    //update their necessary values to reflect the dynamic values for temp, date, user input
-    document.getElementById('date').innerHTML = "DATE: " + allData.date;
-    document.getElementById('temp').innerHTML = "TEMP: " + allData.temp;
-    document.getElementById('content').innerHTML = "NOTE: "+ allData.content;
-
-}catch(error){
-    console.log("error", error);
-  }
-}
-*/
 
 /* Function to POST data */
 const postData = async ( url = '/add', data = {})=>{
-
     const response = await fetch(url, {
     method: 'POST', 
     credentials: 'same-origin', 

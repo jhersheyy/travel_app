@@ -53,7 +53,7 @@ function getInfo(dataObj){
   result.snow = dataObj.snow;
   result.clouds = dataObj.clouds;
   result.humidity= dataObj.rh;
-  console.log("GET INFO RESULT: ", result);
+  //console.log("GET INFO RESULT: ", result);
   return result;
 }
 /*Get Weatherbit API Weather Data*/
@@ -73,7 +73,7 @@ const getWeather = async (lat, long, date, key)=>{
     const res = await fetch(weatherURL)
     try {
       const data = await res.json();
-      console.log(data)
+      //console.log(data)
       if (weatherURL.includes('history')){
         //console.log("USED HISTORY!");
         //used historic api, only one item in data array
@@ -86,15 +86,30 @@ const getWeather = async (lat, long, date, key)=>{
         console.log("temp in getweather: ",data.data[i].temp);
         return getInfo(data.data[i]);
       }
-      //return data;
     }  catch(error) {
       console.log("error in getWeather():: ", error);
       // appropriately handle the error
     }
   }
 
+const getPic= async(input,key)=>{
+  let query = encodeURI(input);
+  let picURL= `https://pixabay.com/api/?key=${key}&q=${query}&orientation=horizontal&safesearch=true`//&category=places`
+  const res = await fetch(picURL)
+  try {
+    const data = await res.json();
+    console.log("GETPIC RESULT: ",data);
+    return data;
+//      return getInfo(data.data[i]);
+  } catch(error) {
+    console.log("error in getPic():: ", error);
+    // appropriately handle the error
+  }
+}
+
   export{ getLatLong, 
           getWeather,
-          getCountdown
+          getCountdown,
+          getPic
         }
   
