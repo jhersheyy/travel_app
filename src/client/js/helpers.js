@@ -61,13 +61,13 @@ const getWeather = async (lat, long, date, key)=>{
     let weatherURL='';
     //const histWeatherURL=
     if (getCountdown(date) > 16){
-      console.log("Finding historic weather for (unchanged): ",date)
+      //console.log("Finding historic weather for (unchanged): ",date)
       date = lastYear(date);
       let endDate = tomorrow(date);
       weatherURL=`https://api.weatherbit.io/v2.0/history/daily?lat=${lat}&lon=${long}&start_date=${date}&end_date=${endDate}&units=I&key=${key}`;
     }
     else{
-      console.log("Finding current weather for: ", date);
+      //console.log("Finding current weather for: ", date);
       weatherURL=`https://api.weatherbit.io/v2.0/forecast/daily?&lat=${lat}&lon=${long}&units=I&key=${key}`;
     }
     const res = await fetch(weatherURL)
@@ -83,7 +83,7 @@ const getWeather = async (lat, long, date, key)=>{
         //used 16-day forecast api, 16 items in array; use countdown+1
         let i= getCountdown(date)+1;
         //console.log(i);
-        console.log("temp in getweather: ",data.data[i].temp);
+        //console.log("temp in getweather: ",data.data[i].temp);
         return getInfo(data.data[i]);
       }
     }  catch(error) {
@@ -92,24 +92,29 @@ const getWeather = async (lat, long, date, key)=>{
     }
   }
 
-const getPic= async(input,key)=>{
-  let query = encodeURI(input);
-  let picURL= `https://pixabay.com/api/?key=${key}&q=${query}&orientation=horizontal&safesearch=true`//&category=places`
-  const res = await fetch(picURL)
+const getPic= async(data,key)=>{//gData (geoinfo from proj data-sever)
+  let query = encodeURI(data.city);
+  let picURL= `https://pixabay.com/api/?key=${key}&q=${query}&safesearch=true&category=places`;
+  console.log("GETPIC URL: ", picURL);
+  const res = await fetch(picURL);
+  
   try {
     const data = await res.json();
-    console.log("GETPIC RESULT: ",data);
-    return data;
+    //console.log("GETPIC RESULT: ",data);
+    let img= data.hits[0];
+    //console.log("UUI img data: ",img);
+    let imgURL = img.webformatURL;
+    //console.log("UUI: imgURL: ", imgURL);
+    return imgURL;
 //      return getInfo(data.data[i]);
   } catch(error) {
     console.log("error in getPic():: ", error);
     // appropriately handle the error
-  }
-}
+  }}
 
-  export{ getLatLong, 
-          getWeather,
-          getCountdown,
-          getPic
-        }
+export{ getLatLong, 
+        getWeather,
+        getCountdown,
+        getPic
+      }
   

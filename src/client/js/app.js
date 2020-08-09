@@ -4,6 +4,7 @@ import {getCountdown} from './helpers'
 import {getPic} from './helpers'
 
 /* Global Variables */
+let allData= {};//client side copy of projectData, updates as process request
 const geoURL= 'http://api.geonames.org/postalCodeSearchJSON?placename='
 const geoKey= '&maxRows=1&countryBias=US&username=jhersheyy' //note the US bias
 
@@ -34,13 +35,14 @@ function performAction(e){
 
   //send info from api to server to save as project data
   .then(function(geoData){
-      let projData = {title: "geoInfo", data: {city: geoData.city_name, lat: geoData.lat, long: geoData.lng, region: geoData.adminName1, country: geoData.countryCode}};
-      postData('/add', projData)
-      //return projData.data;
+    //console.log("geoData presave: ", geoData);
+    let projData = {title: "geoInfo", data: {city: geoData.placeName, lat: geoData.lat, long: geoData.lng, region: geoData.adminName1, country: geoData.countryCode}};
+    postData('/add', projData)
+    //return projData.data;
   })
   /*use projData from serverside to query weatherbit api*/
   .then(function(){
-    let allData = getProjData();
+    allData = getProjData();
     return allData})
   .then(function(pData){
     pData = pData['geoInfo'];
@@ -48,6 +50,7 @@ function performAction(e){
     let long =pData.long; 
     let weatherInfo= getWeather(lat, long, depDate, weatherKey);//object of important info from api query
     return weatherInfo})
+    
   //send weatherData back to projectData on server side
   .then(function(wInfo){
     let weatherData = {title: "weatherInfo", data: wInfo};//format for projData
@@ -55,14 +58,14 @@ function performAction(e){
   })
   //updates ui with data and relevant img from pixabay
   .then(()=>
-    updateUI()
+    updateUI(depDate)
   )
 }
 
 const getProjData = async () =>{
   const request = await fetch('/all')
   try{
-    const allData = await request.json();
+    allData = await request.json();
     //console.log("ALLDATA: ",allData);
     return allData;
   } catch(error){
@@ -71,30 +74,29 @@ const getProjData = async () =>{
 }
 
 /*Gets image from pixabay and updates UI with project data and image*/
-const updateUI = async () => {
-  //retrieve data from our app
-  const allData = await getProjData()
-  
+const updateUI = async (date) => {
+  //retrieve final data from our app
+  allData = await getProjData()
   .then(allData => {
-    let gData = allData['geoInfo'];
+    let gData = allData['geoInfo']; //get data to input to getPic()
     console.log("UPDATE UI GDATA: ", gData);
-    //let wData = allData['weatherInfo'];
-    //console.log("UPDATE UI WDATA: ", wData);
-    let place = gData.loc;
-  //}
-    let picResult= getPic(place, pixKey);//takes input, key
+    let picResult= getPic(gData, pixKey);//takes input, key
     return picResult})
   .then(picResult=>{
-    console.log("UUI picresult: ", picResult);
-    let img = picResult.hits[0];
-    console.log("UUI img data: ",img);
-    let imgURL = img.webformatURL;
-    console.log("UUI: imgURL: ", imgURL);
+    allData["imgURL"] = picResult;
+    return allData})//returns url for image
+  .then(data=>{
+    console.log("UPDATE UI TOTAL DATA: ",data);
+    let wData = data['weatherInfo'];
+    let imgURL = data['imgURL'];
+    console.log(imgURL);
   //select the necessary elements on the DOM (index.html), 
   //update their necessary values to reflect the dynamic values for temp, date, user input
-    document.getElementById('date').innerHTML = "DATE: " ;//+ allData.date;
-    document.getElementById('temp').innerHTML = "TEMP: " ;//+ allData.temp;
-    document.getElementById('content').innerHTML = "NOTE: ";//+ allData.content;
+    document.querySelector('.image').setAttribute('src', imgURL);
+    document.getElementById('date').innerHTML = "DATE: " + date;
+    document.getElementById('temp').innerHTML = "TEMP: " + wData.temp;
+    let clouds = wData.clouds; let hum=wData.humidity; let max=wData.max; let min=wData.min;
+    document.getElementById('content').innerHTML = `NOTES:: clouds: ${clouds} ; humidity: ${hum} ; max temp: ${max} ; min temp: ${min}`;//"NOTE: "+ wData.content;
   })
 }
 
