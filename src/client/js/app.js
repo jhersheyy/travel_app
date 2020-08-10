@@ -23,7 +23,6 @@ function performAction(e){
   //retrieve and store user input from UI
   let location =  document.getElementById('location').value; 
   let depDate = document.getElementById('dday').value;//format: 2020-08-20
-  console.log(location, depDate);
   if (location==''||depDate==''){//check inputs filled out
     alert("Please enter valid info.");
   } else{
@@ -38,7 +37,7 @@ function performAction(e){
         let projData = {title: "geoInfo", data: {city: geoData.placeName, lat: geoData.lat, long: geoData.lng, region: geoData.adminName1, country: geoData.countryCode}};
         postData('/add', projData)
       } catch(error){
-        console.log("error in getLatLong():: ",error)
+        console.log("error getting result from geonames API:: ",error)
       }
     })
     .then(function(){//get serverside data
@@ -46,19 +45,27 @@ function performAction(e){
       return allData
     })
     .then(function(pData){//use server data to query weather api
-      pData = pData['geoInfo'];//need geonames result only
-      let lat = pData.lat;
-      let long =pData.long; 
-      let weatherInfo= getWeather(lat, long, depDate, weatherKey);//return object of info from api query
-      return weatherInfo
+      try{
+        pData = pData['geoInfo'];//need geonames result only
+        let lat = pData.lat;
+        let long =pData.long; 
+        let weatherInfo= getWeather(lat, long, depDate, weatherKey);//return object of info from api query
+        return weatherInfo
+      }catch(error){
+        console.log("error getting result from weatherbit API:: ",error)
+      }
     })  
     .then(function(wInfo){//send weatherData back to projectData on server side
       let weatherData = {title: "weatherInfo", data: wInfo};//format for projData
       postData('/add',weatherData);
     })
-    .then(()=>//updates ui with data and relevant img from pixabay
-      updateUI(depDate)
-    )
+    .then(()=>{//updates ui with data and relevant img from pixabay
+      try{
+        updateUI(depDate)
+      } catch(error){
+        console.log("error updating web page:: ",error)
+      }
+    })
   }
 }
 
@@ -66,7 +73,6 @@ const getProjData = async () =>{
   const request = await fetch('/all')
   try{
     allData = await request.json();
-    //console.log("ALLDATA: ",allData);
     return allData;
   } catch(error){
     console.log("error in getProjData():: ", error);
@@ -79,24 +85,24 @@ const updateUI = async (date) => {
   allData = await getProjData()
   .then(allData => {
     let gData = allData['geoInfo']; //get data to input to getPic()
-    console.log("UPDATE UI GDATA: ", gData);
-    let picResult= getPic(gData, pixKey);//takes input, key
-    return picResult})
+    try{
+      let picResult= getPic(gData, pixKey);//takes input, key
+      return picResult
+    } catch(error){
+      console.log("error getting image from pixabay API:: ",error)
+    }
+  })
   .then(picResult=>{
     allData["imgURL"] = picResult;
     return allData})//returns url for image
   .then(data=>{
-    console.log("UPDATE UI TOTAL DATA: ",data);
     let wData = data['weatherInfo'];
     let imgURL = data['imgURL'];
-    console.log(imgURL);
-    if (imgURL === undefined){
+    if (imgURL === undefined){//update ui with DOM selectors
       document.querySelector('.image').setAttribute('src', backupimg);
     } else{
       document.querySelector('.image').setAttribute('src', imgURL);
     }
-  //select the necessary elements on the DOM (index.html), 
-  //update their necessary values to reflect the dynamic values for temp, date, user input
     document.getElementById('date').innerHTML = "DATE: " + date;
     document.getElementById('temp').innerHTML = "TEMP: " + wData.temp;
     let clouds = wData.clouds; let hum=wData.humidity; let max=wData.max; let min=wData.min;

@@ -34,9 +34,8 @@ const getLatLong = async(url, location, key)=>{
   try{
     const data = await res.json();
     if (data.postalCodes.length == 0){
-      alert("Please re-enter a valid location.");
+      alert("Please enter a valid location.");
     } else{
-    console.log(data);
     return data.postalCodes[0];
     }
   } catch(error){
