@@ -3,9 +3,8 @@ import { initPage } from './js/app'
 import './styles/resets.scss'
 import './styles/style.scss'
 
-
-//var mylogo = document.getElementById('jhlogo');
-//mylogo.src = logo;
+import mainimg from './media/travel.png'
+document.querySelector('.image').setAttribute('src', mainimg);
 
 // Call init on DOMContentLoaded event.
 window.addEventListener('DOMContentLoaded', initPage);

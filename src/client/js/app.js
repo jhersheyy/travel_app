@@ -4,64 +4,62 @@ import {getCountdown} from './helpers'
 import {getPic} from './helpers'
 import backupimg from '../media/img_na.png'
  
-
 /* Global Variables */
 let allData= {};//client side copy of projectData, updates as process request
 const geoURL= 'http://api.geonames.org/postalCodeSearchJSON?placename='
 const geoKey= '&maxRows=1&countryBias=US&username=jhersheyy' //note the US bias
-
 //weatherURL's in function only (using template literals-were causing referenceErrors)
 const weatherKey= '430488ce7d904004b4252036356fc59d';
 //pixURL in function, also using template literals
 const pixKey= '17824144-5c1b0272b392f2756cef29e29';
 
-/*Initial function to load page and then make event listener*/
+/*Initial function= load pg-> then make event listener*/
 function initPage(e){
-  // Event listener to add function to existing HTML DOM element
   document.getElementById('generate').addEventListener('click', performAction);
 }
 
-/* Function called by event listener */
+/* Function called by event listener: main function*/
 function performAction(e){
   //retrieve and store user input from UI
   let location =  document.getElementById('location').value; 
   let depDate = document.getElementById('dday').value;//format: 2020-08-20
-    
-  //get and save how many days til trip date
-  let countdown = getCountdown(depDate);
-  postData('/add', {title: "countdown", data:{daysLeft: countdown}});
+  console.log(location, depDate);
+  if (location==''||depDate==''){//check inputs filled out
+    alert("Please enter valid info.");
+  } else{
+    //get and save how many days til trip date
+    let countdown = getCountdown(depDate);
+    postData('/add', {title: "countdown", data:{daysLeft: countdown}});
 
-  //convert input location to lat,long with geonames api
-  getLatLong(geoURL,location,geoKey)
-    ////gLL() returns object with loc info keys and vals from api
-
-  //send info from api to server to save as project data
-  .then(function(geoData){
-    //console.log("geoData presave: ", geoData);
-    let projData = {title: "geoInfo", data: {city: geoData.placeName, lat: geoData.lat, long: geoData.lng, region: geoData.adminName1, country: geoData.countryCode}};
-    postData('/add', projData)
-    //return projData.data;
-  })
-  /*use projData from serverside to query weatherbit api*/
-  .then(function(){
-    allData = getProjData();
-    return allData})
-  .then(function(pData){
-    pData = pData['geoInfo'];
-    let lat = pData.lat;
-    let long =pData.long; 
-    let weatherInfo= getWeather(lat, long, depDate, weatherKey);//object of important info from api query
-    return weatherInfo})
-    
-  //send weatherData back to projectData on server side
-  .then(function(wInfo){
-    let weatherData = {title: "weatherInfo", data: wInfo};//format for projData
-    postData('/add',weatherData);
-  })
-  //updates ui with data and relevant img from pixabay
-  .then(()=>
-    updateUI(depDate)
-  )
+    //convert input location to lat,long with geonames api
+    getLatLong(geoURL,location,geoKey)//returns object with loc info keys/ vals from api
+    .then(function(geoData){//send g_info from api to server to save as project data
+      try{
+        let projData = {title: "geoInfo", data: {city: geoData.placeName, lat: geoData.lat, long: geoData.lng, region: geoData.adminName1, country: geoData.countryCode}};
+        postData('/add', projData)
+      } catch(error){
+        console.log("error in getLatLong():: ",error)
+      }
+    })
+    .then(function(){//get serverside data
+      allData = getProjData();
+      return allData
+    })
+    .then(function(pData){//use server data to query weather api
+      pData = pData['geoInfo'];//need geonames result only
+      let lat = pData.lat;
+      let long =pData.long; 
+      let weatherInfo= getWeather(lat, long, depDate, weatherKey);//return object of info from api query
+      return weatherInfo
+    })  
+    .then(function(wInfo){//send weatherData back to projectData on server side
+      let weatherData = {title: "weatherInfo", data: wInfo};//format for projData
+      postData('/add',weatherData);
+    })
+    .then(()=>//updates ui with data and relevant img from pixabay
+      updateUI(depDate)
+    )
+  }
 }
 
 const getProjData = async () =>{
