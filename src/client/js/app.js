@@ -2,6 +2,8 @@ import {getLatLong} from './helpers'
 import {getWeather} from './helpers'
 import {getCountdown} from './helpers'
 import {getPic} from './helpers'
+import backupimg from '../media/img_na.png'
+ 
 
 /* Global Variables */
 let allData= {};//client side copy of projectData, updates as process request
@@ -90,9 +92,13 @@ const updateUI = async (date) => {
     let wData = data['weatherInfo'];
     let imgURL = data['imgURL'];
     console.log(imgURL);
+    if (imgURL === undefined){
+      document.querySelector('.image').setAttribute('src', backupimg);
+    } else{
+      document.querySelector('.image').setAttribute('src', imgURL);
+    }
   //select the necessary elements on the DOM (index.html), 
   //update their necessary values to reflect the dynamic values for temp, date, user input
-    document.querySelector('.image').setAttribute('src', imgURL);
     document.getElementById('date').innerHTML = "DATE: " + date;
     document.getElementById('temp').innerHTML = "TEMP: " + wData.temp;
     let clouds = wData.clouds; let hum=wData.humidity; let max=wData.max; let min=wData.min;

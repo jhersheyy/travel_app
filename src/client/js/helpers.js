@@ -1,3 +1,5 @@
+import {getCountry} from './countries'
+
 /*Find difference between today and given date "ddate" */
 function getCountdown(ddate){
     // Create a new date instance dynamically with JS
@@ -38,6 +40,7 @@ const getLatLong = async(url, location, key)=>{
   const res = await fetch(url+location+key)
   try{
     const data = await res.json();
+    console.log(data);
     return data.postalCodes[0];
   } catch(error){
     console.log("error in getLatLong():: ",error)
@@ -92,21 +95,46 @@ const getWeather = async (lat, long, date, key)=>{
     }
   }
 
+function getImgURL(pixdata){
+  let newImg = pixdata.hits[0];
+  let newImgURL = newImg.webformatURL;
+  return newImgURL;
+}
+
 const getPic= async(data,key)=>{//gData (geoinfo from proj data-sever)
   let query = encodeURI(data.city);
   let picURL= `https://pixabay.com/api/?key=${key}&q=${query}&safesearch=true&category=places`;
   console.log("GETPIC URL: ", picURL);
   const res = await fetch(picURL);
-  
   try {
-    const data = await res.json();
+    const rdata = await res.json();
     //console.log("GETPIC RESULT: ",data);
-    let img= data.hits[0];
-    //console.log("UUI img data: ",img);
-    let imgURL = img.webformatURL;
-    //console.log("UUI: imgURL: ", imgURL);
-    return imgURL;
-//      return getInfo(data.data[i]);
+    if(rdata.totalHits == 0){//city got no results->region
+      //console.log("DATA: ", data)
+      //change query to use region instead of city
+      query = encodeURI(data.region);
+      picURL= `https://pixabay.com/api/?key=${key}&q=${query}&safesearch=true&category=places`;
+      console.log("REGION URL: ", picURL)
+      const redo = await fetch(picURL);
+      const newData= await redo.json();
+      if (newData.totalHits==0){//region got no results->country
+        //if no region results, use country
+        query = encodeURI(getCountry(data.country));//country saved as 2 letter code from geonames
+        picURL= `https://pixabay.com/api/?key=${key}&q=${query}&safesearch=true&category=places`;
+        console.log("COUNTRY URL: ",picURL)
+        const redo2 = await fetch(picURL);
+        const newData2= await redo2.json();
+        // if (newData2.totalHits==0){//still no hits
+        //   return './media/img_na.png'
+        // } else{
+          return getImgURL(newData2);
+        // }
+      } else{
+        return getImgURL(newData);
+      }
+    } else{
+      return getImgURL(rdata);
+    }
   } catch(error) {
     console.log("error in getPic():: ", error);
     // appropriately handle the error
