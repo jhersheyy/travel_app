@@ -5,29 +5,42 @@
   <title>Weather Journal</title>
 </head>
 <body>
-  <div id = "app">
-    <div class ="holder headline">
-      Weather Journal App
+  <header>     
+    <img id="jhlogo" alt= "JH Logo" class ='logo'>
+    <div class="holder headline">
+        JH Travel App
     </div>
+  </header>
+  <div id = "app">
     <div class ="holder zip">
-      <label for="location">Enter zipcode here</label>
+      <label for="location">Enter destination here</label>
       <input type="text" id="location" placeholder="Enter destination here">
     </div>
-    <div class ="holder feel">
+    <div class ="feel">
       <label for="dday">Departure Date: </label>
-      <input class= "myInput" id="dday" type="date" min="2020-08-01" max="2021-08-07"></input>
-      <button id="generate" type = "submit"> Generate </button>
+      <input id="dday" type="date" min="2020-08-11" max="2021-08-11"></input>
+      <div id="trigger"><button id="generate" type = "submit"> Generate </button></div>
     </div>
-    <div class ="holder entry">
-      <div class = "title">*~Upcoming Trip~*</div>
+    <div class ="entry">
+      <div class = "title"></div>
       <div id = "entryHolder">
-        <img class = "image">
+        <img class = "mainimg">
+        <div id = "dest"></div>
         <div id = "date"></div> 
         <div id = "temp"></div>
-        <div id = "content"></div>
+        <div class= "secondary">
+          <div id = "countdown"></div>
+          <div id = "max"></div>
+          <div id = "min"></div>
+          <div id = "clouds"></div>
+          <div id = "humidity"></div>
+        </div>
       </div>
     </div>
   </div>
-
+<footer>
+  <div class= "fttext">Images provided by <a href="" target="_blank">Pixabay</a>.</div>
+  <div><img id= "pixlogo" alt="Pixabay Logo" class="logo"></div>
+</footer>
 </body>
 </html>

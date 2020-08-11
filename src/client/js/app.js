@@ -38,6 +38,7 @@ function performAction(e){
         postData('/add', projData)
       } catch(error){
         console.log("error getting result from geonames API:: ",error)
+        return Promise.reject(error);
       }
     })
     .then(function(){//get serverside data
@@ -79,6 +80,19 @@ const getProjData = async () =>{
   }
 }
 
+function displayDest(data){
+  let result = '';
+  let dest = data['geoInfo'].city;
+  let dreg = data['geoInfo'].region;
+  let dctry= data['geoInfo'].country;
+  if (data.geoInfo.hasOwnProperty('region')){
+    result = `${dest}, ${dreg}, ${dctry}`;
+  } else{ 
+    result = `${dest}, ${dctry}`;
+  }
+  return result;
+}
+
 /*Gets image from pixabay and updates UI with project data and image*/
 const updateUI = async (date) => {
   //retrieve final data from our app
@@ -98,15 +112,21 @@ const updateUI = async (date) => {
   .then(data=>{
     let wData = data['weatherInfo'];
     let imgURL = data['imgURL'];
+    let dest = displayDest(data);//gets string of destination
     if (imgURL === undefined){//update ui with DOM selectors
-      document.querySelector('.image').setAttribute('src', backupimg);
+      document.querySelector('.mainimg').setAttribute('src', backupimg);
     } else{
-      document.querySelector('.image').setAttribute('src', imgURL);
+      document.querySelector('.mainimg').setAttribute('src', imgURL);
     }
-    document.getElementById('date').innerHTML = "DATE: " + date;
-    document.getElementById('temp').innerHTML = "TEMP: " + wData.temp;
-    let clouds = wData.clouds; let hum=wData.humidity; let max=wData.max; let min=wData.min;
-    document.getElementById('content').innerHTML = `NOTES:: clouds: ${clouds} ; humidity: ${hum} ; max temp: ${max} ; min temp: ${min}`;//"NOTE: "+ wData.content;
+    document.querySelector('.title').innerHTML="*~Trip Details~*"
+    document.getElementById('dest').innerHTML = dest;
+    document.getElementById('date').innerHTML = "Departure: " + date;
+    document.getElementById('temp').innerHTML = "Average Temp: " + wData.temp+"°F";
+    document.getElementById('countdown').innerHTML=data.countdown.daysLeft+"days away...";
+    document.getElementById('max').innerHTML = "Daily max: " +wData.max+"°F"; 
+    document.getElementById('min').innerHTML = "Daily min: " + wData.min+"°F";
+    document.getElementById('clouds').innerHTML = "Cloud coverage: " + wData.clouds+"%";
+    document.getElementById('humidity').innerHTML = "Humidity: " + wData.humidity+"%";
   })
 }
 

@@ -36,6 +36,7 @@ const getLatLong = async(url, location, key)=>{
     if (data.postalCodes.length == 0){
       alert("Please enter a valid location.");
     } else{
+      alert("Getting data now~ Please wait...");
     return data.postalCodes[0];
     }
   } catch(error){
@@ -71,7 +72,6 @@ const getWeather = async (lat, long, date, key)=>{
     try {
       const data = await res.json();
       if (weatherURL.includes('history')){//used historic api, only one item in data array
-        console.log("temp in getweather: ", data.data[0].temp);
         return getInfo(data.data[0]);
       } else{//used 16-day forecast api, 16 items in array; use countdown+1
         let i= getCountdown(date)+1; //use countdown to get index
