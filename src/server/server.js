@@ -1,5 +1,5 @@
 // Setup empty JS object to act as endpoint for all routes
-projectData = {};
+let projectData = {};
 
 // Require Express to run server and routes
 const express = require('express');
@@ -22,20 +22,14 @@ app.use(cors());
 // Initialize the main project folder
 app.use(express.static('dist'));
 
-// Setup Server
-const port = 8081;
-const server = app.listen(port, listening);
-
-// Callback to debug
-function listening(){
-    console.log(`JH Travel App now running on port ${port}`);
-  };
 
 // Use dist html file for home route
   app.get('/', function (req, res) {
     res.sendFile('dist/index.html')
 })
-
+app.get('/test', async (req, res) => {
+  res.json({message: 'pass!'})
+})
 // Initialize all route with a callback function
 app.get('/all', sendData);
 
@@ -52,3 +46,5 @@ function addPost(req,res){
   res.send(projectData);
   console.log("pdata now set to: ", projectData)
 };
+
+module.exports = app

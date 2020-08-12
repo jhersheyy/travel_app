@@ -1,5 +1,6 @@
 import { getCountdown } from "../src/client/js/helpers"
-
+import { getPic } from "../src/client/js/helpers"
+import { getImgURL } from "../src/client/js/helpers"
 
 describe('Testing countdown functionality' , () => {
     let testdate = "2020-09-28";
@@ -10,10 +11,20 @@ describe('Testing countdown functionality' , () => {
 });
 
 // describe('Testing urlChecker() function for illegitimate urls' , () => {
-//     var url = "asdlgkajiej093280982.clkj19a";
-//     test('It should return true', async () => {//make it a null one
-//         const response = checkURL(url);
-//         expect(response).toBeDefined();
-//         expect(response).toBeFalsy();
+//     let data={
+//         city: 'Atlanta',
+//         lat: 33.823555,
+//         long: -84.321402,
+//         region: 'Georgia',
+//         country: 'US'
+//       }
+//     it('Async test', async done => {
+//         // Do your async tests here
+//         let pdata= getPic(data);
+//         console.log(pdata);
+//         let url= getImgURL(pdata);
+//         expect(url).toBeDefined();
+//         // expect(response).toBeFalsy();
+//         done();
 //     });
 // });

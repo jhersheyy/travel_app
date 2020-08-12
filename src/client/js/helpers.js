@@ -120,6 +120,7 @@ const getPic= async(data,key)=>{//gData (geoinfo from proj data-sever)
 export{ getLatLong, 
         getWeather,
         getCountdown,
-        getPic
+        getPic,
+        getImgURL
       }
   
