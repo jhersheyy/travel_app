@@ -13,7 +13,7 @@ const weatherKey= '430488ce7d904004b4252036356fc59d';
 //pixURL in function, also using template literals
 const pixKey= '17824144-5c1b0272b392f2756cef29e29';
 
-/*Initial function= load pg-> then make event listener*/
+/*Primary func to export: Initial function= load pg-> then make event listener*/
 function initPage(e){
   document.getElementById('generate').addEventListener('click', performAction);
 }
@@ -31,6 +31,7 @@ function performAction(e){
     postData('/add', {title: "countdown", data:{daysLeft: countdown}});
 
     //convert input location to lat,long with geonames api
+   
     getLatLong(geoURL,location,geoKey)//returns object with loc info keys/ vals from api
     .then(function(geoData){//send g_info from api to server to save as project data
       try{
@@ -38,7 +39,7 @@ function performAction(e){
         postData('/add', projData)
       } catch(error){
         console.log("error getting result from geonames API:: ",error)
-        return Promise.reject(error);
+        //return Promise.reject(error);
       }
     })
     .then(function(){//get serverside data

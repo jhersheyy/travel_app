@@ -6,6 +6,8 @@ $bradius: 30%;//    border-radius: 15%;
 $footercolor: #02346c;
 $headercolor : #e7bdb6;
 
+//debugging*{ border: 1px solid red !important; }
+
 header{
     background-color: $headercolor;
 }
@@ -17,6 +19,10 @@ body{
 
 footer{
     background-color: $footercolor;
+}
+
+a:hover{
+    color: $headercolor;
 }
 
 #entryHolder{
@@ -46,28 +52,25 @@ footer{
     background-color: rgba(265,265,265,0.4);
     width: auto;
 }
+.center{
+    text-align: center;
+}
+
 .mainimg{
     width:80%;
     text-align: center;
     border-radius: $bradius;
-
 }
 
 .logo{
     height:2em;  
     width: auto;
     margin: 5px 10px 5px 10px;
-    padding: 2px;  
 }
 
 .secondary{
     font-size: 15px;
     justify-content: left;
-}
-
-.entry{
-    //background: rgba(59, 74, 107, .4);
-    text-align: center;
 }
 
 .title{
@@ -108,3 +111,33 @@ button:focus {
     padding: 5px;
 
 } 
+
+
+@media (min-width: 500px) and (max-width: 613px){
+    .mainimg{
+        width:40%;
+    }
+}
+
+@media (min-width: 614px){
+    #app{
+        display: flex;
+        /* grid-template-columns:  */
+        height:minmax(100vh, auto);
+        justify-content: left;
+        padding: 15px;
+        grid-gap: 0.5em;
+    }
+    #user{
+        width: 50vw;
+        display: flex;
+        flex-direction: column;
+        justify-content: space-evenly;      
+    }
+    .data{
+        width: 50vw;
+        text-align: center;
+        padding: 15px;
+        margin: 10px;
+    }
+}
